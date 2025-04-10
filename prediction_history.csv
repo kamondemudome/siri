@@ -1,0 +1,5 @@
+HighBP,HighChol,CholCheck,BMI,GenHlth,MentHlth,PhysHlth,NoDocbcCost,Smoker,PhysActivity,Fruits,Veggies,HvyAlcoholConsump,Sex,Age,Education,Income,Probability,Prediction,Timestamp
+1,0,1,25.0,3,0,26,0,1,0,1,0,0,1,4,1,1,0.5095869828735851,High risk (>50%),2025-04-10 11:14:26
+0,0,0,25.0,3,0,0,0,0,0,0,0,0,0,1,1,1,0.09181826756911282,Low risk (<30%),2025-04-10 11:37:51
+1,0,0,80.0,3,18,17,1,1,1,1,1,1,1,1,5,5,0.1785919241365906,Low risk (<30%),2025-04-10 11:39:17
+0,0,0,25.0,3,0,0,0,0,0,0,0,0,0,1,1,1,0.09181826756911282,Low risk (<30%),2025-04-10 11:48:49
