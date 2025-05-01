@@ -5,14 +5,13 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
-import plotly.express as px  # Added for interactive plots
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import Image, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import io
 import json
@@ -151,7 +150,6 @@ def apply_settings(settings):
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            border: 1px solid #34495e;
         }
 
         /* Form and input styling */
@@ -252,37 +250,23 @@ def apply_settings(settings):
             margin-bottom: 20px;
         }
 
-        /* Summary Card Styling */
-        .summary-card {
-            background-color: #34495e;
+        /* Metric Card Styling */
+        .metric-card {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            border: 1px solid #4a677d;
             text-align: center;
         }
-        .summary-card h4 {
+        .metric-card h4 {
             color: #ecf0f1;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
-        .summary-card p {
-            color: #bdc3c7;
-            margin: 5px 0;
-        }
-
-        /* Empty State Styling */
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            background-color: #34495e;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            border: 1px solid #4a677d;
-        }
-        .empty-state p {
-            color: #bdc3c7;
-            font-size: 16px;
+        .metric-card .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
         }
         </style>
         """
@@ -336,7 +320,6 @@ def apply_settings(settings):
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #d1d8e0;
         }
 
         /* Form and input styling */
@@ -437,37 +420,23 @@ def apply_settings(settings):
             margin-bottom: 20px;
         }
 
-        /* Summary Card Styling */
-        .summary-card {
-            background-color: #ecf0f1;
+        /* Metric Card Styling */
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff, #ecf0f1);
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #d1d8e0;
             text-align: center;
         }
-        .summary-card h4 {
+        .metric-card h4 {
             color: #2c3e50;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
-        .summary-card p {
-            color: #34495e;
-            margin: 5px 0;
-        }
-
-        /* Empty State Styling */
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            background-color: #ecf0f1;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #d1d8e0;
-        }
-        .empty-state p {
-            color: #34495e;
-            font-size: 16px;
+        .metric-card .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
         }
         </style>
         """
@@ -509,6 +478,9 @@ def apply_settings(settings):
         text-decoration: underline;
     }}
     .health-card .risk-level {{
+        color: {accent_colors.get(accent_color, "#3498db")} !important;
+    }}
+    .metric-card .value {{
         color: {accent_colors.get(accent_color, "#3498db")} !important;
     }}
     </style>
@@ -612,34 +584,6 @@ FEATURE_DESCRIPTIONS = {
     'GenHlth': 'How would you rate your general health? (1 = Excellent, 5 = Poor)',
     'MentHlth': 'How many days in the past 30 days was your mental health not good?',
     'PhysHlth': 'How many days in the past 30 days was your physical health not good?',
-    'Sex': 'What is your sex?',
-    'Age': 'What is your age category?',
-    'Education': 'What is your education level?',
-    'Income': 'What is your income category?'
-}
-
-FEATURE_TOOLTIPS = {
-    'HighBP': 'Select "Yes" if you have been diagnosed with high blood pressure.',
-    'HighChol': 'Select "Yes" if you have been diagnosed with high cholesterol.',
-    'CholCheck': 'Select "Yes" if you’ve had your cholesterol checked in the last 5 years.',
-    'BMI': 'Enter your BMI (e.g., 25.0). BMI = weight (kg) / height (m)^2.',
-    'Smoker': 'Select "Yes" if you have smoked at least 100 cigarettes in your lifetime.',
-    'PhysActivity': 'Select "Yes" if you’ve done any physical activity (e.g., walking, exercise) in the past 30 days.',
-    'Fruits': 'Select "Yes" if you eat fruit at least once per day.',
-    'Veggies': 'Select "Yes" if you eat vegetables at least once per day.',
-    'HvyAlcoholConsump': 'Select "Yes" if you drink more than 14 drinks per week (men) or 7 drinks per week (women).',
-    'NoDocbcCost': 'Select "Yes" if you couldn’t see a doctor due to cost in the past 12 months.',
-    'GenHlth': 'Rate your overall health on a scale from 1 (excellent) to 5 (poor).',
-    'MentHlth': 'Enter the number of days (0-30) you experienced poor mental health (e.g., stress, depression) in the past 30 days.',
-    'PhysHlth': 'Enter the number of days (0-30) you experienced poor physical health (e.g., illness, injury) in the past 30 days.',
-    'Sex': 'Select your biological sex.',
-    'Age': 'Select your age category (e.g., 1 = 18-24, 9 = 55-59, 13 = 80+).',
-    'Education': 'Select your highest level of education (e.g., 1 = Never attended, 6 = College graduate).',
-    'Income': 'Select your annual income category (e.g., 1 = < $10,000, 8 = $75,000+).'
-}
-
-AGE_LABELS = {
-    1: "18-24", 2: "25-29", 3: "30-34", 4: "35-39", 5: "40-44", 6: "45-49",
     'Sex': 'What is your sex?',
     'Age': 'What is your age category?',
     'Education': 'What is your education level?',
@@ -780,7 +724,7 @@ def get_health_tips(user_data, shap_values):
                 if feature == 'GenHlth' and user_data['GenHlth'] >= 4:
                     tips.append("Your general health rating is poor. Consider scheduling a check-up with your doctor to address any underlying health issues.")
                 elif feature == 'BMI' and user_data['BMI'] >= 30:
-                    tips.append("Your BMI is high. Consulting a dietitian or starting a weight management program may help reduce your diabetes risk.")
+                    tips.append("Your BMI is high. Consulting a dietitian or starting a weight management program may help reduce your risk.")
                 elif feature == 'HighBP' and user_data['HighBP'] == 1:
                     tips.append("High blood pressure increases your risk. Monitor your blood pressure regularly and discuss management options with your doctor.")
                 elif feature == 'PhysActivity' and user_data['PhysActivity'] == 0:
@@ -1398,18 +1342,52 @@ elif page == "Preventive Measures":
 # --- Start of "Reports & Progress" Page ---
 elif page == "Reports & Progress":
     st.title("📊 Reports & Progress")
-    st.markdown("""
-    ### Track Your Diabetes Risk Journey
-    Monitor your past predictions and analyze trends in your diabetes risk over time. Use this page to gain insights into your health progress and identify areas for improvement.
-    """)
-
+    st.markdown("### Track Your Diabetes Risk Over Time")
+    
     # Load prediction history
     history_df = load_prediction_history()
-
-    # Date Range Filter
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("#### Filter by Date Range")
+    
+    # Overview Section
+    st.markdown('<div class="health-card">', unsafe_allow_html=True)
+    st.markdown("#### Progress Overview")
     if not history_df.empty:
+        avg_risk = history_df['Probability'].mean()
+        min_risk = history_df['Probability'].min()
+        max_risk = history_df['Probability'].max()
+        trend = "Decreasing 📉" if history_df['Probability'].iloc[-1] < history_df['Probability'].iloc[0] else "Increasing 📈"
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.markdown("##### Average Risk")
+            st.markdown(f'<div class="value">{avg_risk:.2%}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with col2:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.markdown("##### Lowest Risk")
+            st.markdown(f'<div class="value">{min_risk:.2%}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with col3:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.markdown("##### Highest Risk")
+            st.markdown(f'<div class="value">{max_risk:.2%}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with col4:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.markdown("##### Trend")
+            st.markdown(f'<div class="value">{trend}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.write("No prediction history available. Use the Diabetes Detection Tool to start tracking your risk.")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Past Detection Results Section
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("#### Past Detection Results")
+    if not history_df.empty:
+        st.write("**Your Prediction History (Sortable & Filterable):**")
+        
+        # Add date range filter
         min_date = history_df['Timestamp'].min().date()
         max_date = history_df['Timestamp'].max().date()
         col1, col2 = st.columns(2)
@@ -1418,66 +1396,138 @@ elif page == "Reports & Progress":
         with col2:
             end_date = st.date_input("End Date", max_date, min_value=min_date, max_value=max_date)
         
-        # Convert dates to datetime for filtering
-        start_date = pd.to_datetime(start_date)
-        end_date = pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)  # Include the end date fully
-        filtered_df = history_df[(history_df['Timestamp'] >= start_date) & (history_df['Timestamp'] <= end_date)]
-    else:
-        filtered_df = history_df
-        st.write("No data available to filter. Please use the Diabetes Detection Tool to start tracking your risk.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Summary Statistics
-    if not filtered_df.empty:
-        st.markdown('<div class="summary-card">', unsafe_allow_html=True)
-        st.markdown("#### Summary Statistics")
-        avg_risk = filtered_df['Probability'].mean()
-        max_risk = filtered_df['Probability'].max()
-        min_risk = filtered_df['Probability'].min()
-        total_predictions = len(filtered_df)
+        # Filter by date range
+        filtered_df = history_df[
+            (history_df['Timestamp'].dt.date >= start_date) & 
+            (history_df['Timestamp'].dt.date <= end_date)
+        ]
         
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown(f"**Average Risk**<br>{avg_risk:.2%}", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"**Highest Risk**<br>{max_risk:.2%}", unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"**Lowest Risk**<br>{min_risk:.2%}", unsafe_allow_html=True)
-        with col4:
-            st.markdown(f"**Total Predictions**<br>{total_predictions}", unsafe_allow_html=True)
-
-        # Trend Analysis
-        if len(filtered_df) >= 2:
-            first_risk = filtered_df['Probability'].iloc[0]
-            last_risk = filtered_df['Probability'].iloc[-1]
-            risk_change = last_risk - first_risk
-            if risk_change < 0:
-                trend_message = f"Your risk has **decreased** by {abs(risk_change):.2%} over this period. Great job!"
-            elif risk_change > 0:
-                trend_message = f"Your risk has **increased** by {risk_change:.2%} over this period. Consider reviewing your health habits."
-            else:
-                trend_message = "Your risk has remained **stable** over this period."
-            st.markdown(f"**Trend Analysis**: {trend_message}", unsafe_allow_html=True)
-
-        # Milestone Check
-        low_risk_streak = (filtered_df['Probability'] < 0.3).sum()
-        if low_risk_streak >= 3:
-            st.markdown("🎉 **Milestone Achieved**: You've maintained a low risk (<30%) for your last 3 predictions!", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Past Detection Results
+        # Filter by risk level
+        risk_levels = ["All", "Low risk (<30%)", "Moderate risk (30-50%)", "High risk (>50%)"]
+        selected_risk = st.selectbox("Filter by Risk Level", risk_levels)
+        if selected_risk != "All":
+            filtered_df = filtered_df[filtered_df['Prediction'] == selected_risk]
+        
+        if not filtered_df.empty:
+            # Prepare display DataFrame
+            display_df = filtered_df[['Timestamp', 'Prediction', 'Probability']].copy()
+            display_df['Probability'] = display_df['Probability'].apply(lambda x: f"{x:.2%}")
+            display_df['Details'] = ""
+            
+            # Display the table
+            st.dataframe(
+                display_df,
+                column_config={
+                    "Timestamp": "Date & Time",
+                    "Prediction": "Risk Level",
+                    "Probability": "Risk Probability",
+                    "Details": st.column_config.TextColumn("Details")
+                },
+                use_container_width=True
+            )
+            
+            # Add expanders for each row
+            for idx, row in filtered_df.iterrows():
+                with st.expander(f"Details for {row['Timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
+                    for feature in FEATURES:
+                        value = row[feature]
+                        if feature in ['Age', 'Education', 'Income']:
+                            if feature == 'Age':
+                                display_value = AGE_LABELS[value]
+                            elif feature == 'Education':
+                                display_value = EDUCATION_LABELS[value]
+                            elif feature == 'Income':
+                                display_value = INCOME_LABELS[value]
+                        elif feature == 'Sex':
+                            display_value = 'Male' if value == 1 else 'Female'
+                        elif feature in ['HighBP', 'HighChol', 'CholCheck', 'Smoker', 'PhysActivity', 'Fruits', 'Veggies', 'HvyAlcoholConsump', 'NoDocbcCost']:
+                            display_value = 'Yes' if value == 1 else 'No'
+                        else:
+                            display_value = str(value)
+                        st.write(f"- **{FEATURE_FULL_NAMES[feature]}**: {display_value}")
+            
+            # Download button for filtered data
+            csv = filtered_df.to_csv(index=False)
+            st.download_button(
+                label="Download Prediction History as CSV",
+                data=csv,
+                file_name=f"prediction_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv"
+            )
+        else:
+            st.write("No predictions match the selected filters.")
+    else:
+        st.write("No prediction history available. Use the Diabetes Detection Tool to start tracking your risk.")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Health Trends Section
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("#### Past Detection Results")
-    if not filtered_df.empty:
-        st.write("**Your Past Predictions:**")
-        for idx, row in filtered_df.iterrows():
-            st.write(f"- **Date:** {row['Timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
-            st.write(f"  **Risk Level:** {row['Prediction']}")
-            st.write(f"  **Probability:** {row['Probability']:.2%}")
-        # Download Button for Prediction History
-        csv = filtered_df.to_csv(index=False)
-        st.download_button(
-            label="Download Prediction History as CSV",
-            data=csv,
-            file_name=f"prediction_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv",
+    st.markdown("#### Health Trends Over Time")
+    if not history_df.empty:
+        # Time range filter
+        time_range = st.selectbox("Select Time Range", ["Last 30 Days", "Last 90 Days", "All Time"])
+        filtered_trend_df = history_df.copy()
+        if time_range == "Last 30 Days":
+            filtered_trend_df = filtered_trend_df[filtered_trend_df['Timestamp'] >= datetime.now() - timedelta(days=30)]
+        elif time_range == "Last 90 Days":
+            filtered_trend_df = filtered_trend_df[filtered_trend_df['Timestamp'] >= datetime.now() - timedelta(days=90)]
+        
+        if not filtered_trend_df.empty:
+            fig, ax = plt.subplots(figsize=(12, 6))
+            
+            # Plot the risk probability with a filled area
+            ax.fill_between(
+                filtered_trend_df['Timestamp'],
+                filtered_trend_df['Probability'],
+                color='blue',
+                alpha=0.1
+            )
+            ax.plot(
+                filtered_trend_df['Timestamp'],
+                filtered_trend_df['Probability'],
+                marker='o',
+                color='blue',
+                label='Diabetes Risk Probability'
+            )
+            
+            # Calculate and plot moving average
+            if len(filtered_trend_df) >= 3:
+                moving_avg = filtered_trend_df['Probability'].rolling(window=3, min_periods=1).mean()
+                ax.plot(
+                    filtered_trend_df['Timestamp'],
+                    moving_avg,
+                    color='orange',
+                    linestyle='--',
+                    label='3-Point Moving Average'
+                )
+            
+            # Highlight significant changes
+            if len(filtered_trend_df) >= 2:
+                changes = filtered_trend_df['Probability'].diff().abs()
+                significant_change = changes > 0.1  # Threshold for significant change
+                for idx, (timestamp, change, prob) in enumerate(zip(
+                    filtered_trend_df['Timestamp'][significant_change],
+                    changes[significant_change],
+                    filtered_trend_df['Probability'][significant_change]
+                )):
+                    ax.annotate(
+                        f"Change: {change:.2%}",
+                        (timestamp, prob),
+                        textcoords="offset points",
+                        xytext=(0, 10),
+                        ha='center',
+                        color='red'
+                    )
+            
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Risk Probability")
+            ax.set_title("Your Diabetes Risk Over Time")
+            ax.grid(True, linestyle='--', alpha=0.7)
+            
+            if st.session_state["settings"]["theme"] == "Dark":
+                ax.set_facecolor('#2c3e50')
+                fig.set_facecolor('#2c3e50')
+                ax.tick_params(colors='#ecf0f1')
+                ax.xaxis.label.set_color('#ecf0f1')
+                ax.yaxis.label.set_color('#ecf0f1')
+                ax
