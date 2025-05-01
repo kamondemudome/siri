@@ -201,6 +201,17 @@ def apply_settings(settings):
         /* Footer styling */
         .footer {
             color: #bdc3c7;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 20px;
+            border-top: 1px solid #34495e;
+        }
+        .footer .message {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .footer .copyright, .footer .developer {
+            font-size: 12px;
         }
 
         /* Health Card Styling */
@@ -371,6 +382,17 @@ def apply_settings(settings):
         /* Footer styling */
         .footer {
             color: #7f8c8d;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 20px;
+            border-top: 1px solid #d1d8e0;
+        }
+        .footer .message {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .footer .copyright, .footer .developer {
+            font-size: 12px;
         }
 
         /* Health Card Styling */
@@ -607,7 +629,7 @@ FEATURE_TOOLTIPS = {
     'Sex': 'Select your biological sex.',
     'Age': 'Select your age category (e.g., 1 = 18-24, 9 = 55-59, 13 = 80+).',
     'Education': 'Select your highest level of education (e.g., 1 = Never attended, 6 = College graduate).',
-    'Income': 'Select your annual income category (e.g., 1 = < $10,000, 8 = $75,000+).'
+    'Income': 'Select your annual income category (e.g., 1 = < Ksh 10000, 8 = Ksh 1000000+).'
 }
 
 AGE_LABELS = {
@@ -621,8 +643,8 @@ EDUCATION_LABELS = {
 }
 
 INCOME_LABELS = {
-    1: "< $10,000", 2: "$10,000-$15,000", 3: "$15,000-$25,000", 4: "$25,000-$35,000",
-    5: "$35,000-$50,000", 6: "$50,000-$75,000", 7: "$75,000-$100,000", 8: "$100,000+"
+    1: "< Ksh 10000", 2: "Ksh 10000-15000", 3: "Ksh 15000-25000", 4: "Ksh 25000-35000",
+    5: "Ksh 35000-50000", 6: "Ksh 50000-75000", 7: "Ksh 75000-100000", 8: "Ksh 1000000+"
 }
 
 def predict_diabetes(user_data, threshold, show_debug):
@@ -1021,6 +1043,15 @@ if new_settings != st.session_state["settings"]:
 # Apply the settings
 st.markdown(apply_settings(st.session_state["settings"]), unsafe_allow_html=True)
 
+# Define the footer HTML
+footer_html = """
+<div class="footer">
+    <div class="message">Empower Your Health Journey – Stay Ahead of Diabetes!</div>
+    <div class="copyright">© 2025 Diabetes Risk Dashboard</div>
+    <div class="developer">Developed by Kamonde K. Mudome</div>
+</div>
+"""
+
 # Main content based on the selected page
 # --- Start of "Home" Page ---
 if page == "Home":
@@ -1109,6 +1140,9 @@ if page == "Home":
     st.write("- *'How can I reduce my BMI effectively?'* - 10 replies")
     st.write("Join the conversation in the Community Support section!")
     st.markdown('</div>', unsafe_allow_html=True)
+
+    # Add Footer
+    st.markdown(footer_html, unsafe_allow_html=True)
 # --- End of "Home" Page ---
 
 # --- Start of "Diabetes Detection Tool" Page ---
@@ -1217,8 +1251,8 @@ elif page == "Diabetes Detection Tool":
         if submitted:
             prob, prediction, shap_values = predict_diabetes(user_data, threshold, show_debug)
             if prob is not None:
-                if save_history:
-                    save_to_csv(user_data, prob, prediction)
+                # Always save to history regardless of save_history checkbox
+                save_to_csv(user_data, prob, prediction)
 
                 st.write("### Prediction Results")
                 st.markdown(f'<div class="health-avatar">{get_health_avatar(prob)}</div>', unsafe_allow_html=True)
@@ -1278,6 +1312,9 @@ elif page == "Diabetes Detection Tool":
                         st.warning(f"Error cleaning up temporary PDF file: {str(e)}")
 
                 st.markdown('<div class="disclaimer">**Note:** This prediction is for informational purposes only. Please consult a healthcare professional for a medical diagnosis.</div>', unsafe_allow_html=True)
+
+    # Add Footer
+    st.markdown(footer_html, unsafe_allow_html=True)
 # --- End of "Diabetes Detection Tool" Page ---
 
 # --- Start of "Awareness" Page ---
@@ -1311,6 +1348,9 @@ elif page == "Awareness":
     st.write("**Understanding Diabetes (Video)** - A 5-minute overview of diabetes causes and management. *(Link to be added)*")
     st.write("**Healthy Eating Tips (Video)** - Tips to maintain a balanced diet to prevent diabetes. *(Link to be added)*")
     st.markdown('</div>', unsafe_allow_html=True)
+
+    # Add Footer
+    st.markdown(footer_html, unsafe_allow_html=True)
 # --- End of "Awareness" Page ---
 
 # --- Start of "Preventive Measures" Page ---
@@ -1337,6 +1377,9 @@ elif page == "Preventive Measures":
     st.write("- Exercise: 5 days of moderate activity")
     st.write("- Diet: Reduce sugary drinks to 1 per week")
     st.markdown('</div>', unsafe_allow_html=True)
+
+    # Add Footer
+    st.markdown(footer_html, unsafe_allow_html=True)
 # --- End of "Preventive Measures" Page ---
 
 # --- Start of "Reports & Progress" Page ---
@@ -1530,4 +1573,9 @@ elif page == "Reports & Progress":
                 ax.tick_params(colors='#ecf0f1')
                 ax.xaxis.label.set_color('#ecf0f1')
                 ax.yaxis.label.set_color('#ecf0f1')
-                ax
+                ax.title.set_color('#ecf0f1')
+            else:
+                ax.set_facecolor('#ffffff')
+                fig.set_facecolor('#ffffff')
+                ax.tick_params(colors='#34495e')
+                ax.xaxis.label
