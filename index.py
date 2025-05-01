@@ -279,6 +279,29 @@ def apply_settings(settings):
             font-weight: bold;
             color: #3498db;
         }
+
+        /* Custom Table Styling for Prediction Details */
+        .prediction-details-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .prediction-details-table th {
+            background-color: #34495e;
+            color: #ecf0f1;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #2c3e50;
+        }
+        .prediction-details-table td {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px;
+            border-bottom: 1px solid #34495e;
+        }
+        .prediction-details-table tr:nth-child(even) td {
+            background-color: #34495e;
+        }
         </style>
         """
     else:  # Light Mode
@@ -459,6 +482,29 @@ def apply_settings(settings):
             font-size: 20px;
             font-weight: bold;
             color: #3498db;
+        }
+
+        /* Custom Table Styling for Prediction Details */
+        .prediction-details-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .prediction-details-table th {
+            background-color: #d1d8e0;
+            color: #34495e;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #b0bec5;
+        }
+        .prediction-details-table td {
+            background-color: #ffffff;
+            color: #34495e;
+            padding: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .prediction-details-table tr:nth-child(even) td {
+            background-color: #f9f9f9;
         }
         </style>
         """
@@ -1469,9 +1515,11 @@ elif page == "Reports & Progress":
                 use_container_width=True
             )
             
-            # Add expanders for each row
+            # Add expanders for each row with a styled table
             for idx, row in filtered_df.iterrows():
                 with st.expander(f"Details for {row['Timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
+                    # Prepare data for the table
+                    table_data = []
                     for feature in FEATURES:
                         value = row[feature]
                         if feature in ['Age', 'Education', 'Income']:
@@ -1487,7 +1535,18 @@ elif page == "Reports & Progress":
                             display_value = 'Yes' if value == 1 else 'No'
                         else:
                             display_value = str(value)
-                        st.write(f"- **{FEATURE_FULL_NAMES[feature]}**: {display_value}")
+                        table_data.append({
+                            "Feature": FEATURE_FULL_NAMES[feature],
+                            "Value": display_value
+                        })
+                    
+                    # Convert to DataFrame for display
+                    table_df = pd.DataFrame(table_data)
+                    
+                    # Display the table with custom styling
+                    st.markdown('<div class="prediction-details-table">', unsafe_allow_html=True)
+                    st.table(table_df)
+                    st.markdown('</div>', unsafe_allow_html=True)
             
             # Download button for filtered data
             csv = filtered_df.to_csv(index=False)
@@ -1533,49 +1592,4 @@ elif page == "Reports & Progress":
                 label='Diabetes Risk Probability'
             )
             
-            # Calculate and plot moving average
-            if len(filtered_trend_df) >= 3:
-                moving_avg = filtered_trend_df['Probability'].rolling(window=3, min_periods=1).mean()
-                ax.plot(
-                    filtered_trend_df['Timestamp'],
-                    moving_avg,
-                    color='orange',
-                    linestyle='--',
-                    label='3-Point Moving Average'
-                )
-            
-            # Highlight significant changes
-            if len(filtered_trend_df) >= 2:
-                changes = filtered_trend_df['Probability'].diff().abs()
-                significant_change = changes > 0.1  # Threshold for significant change
-                for idx, (timestamp, change, prob) in enumerate(zip(
-                    filtered_trend_df['Timestamp'][significant_change],
-                    changes[significant_change],
-                    filtered_trend_df['Probability'][significant_change]
-                )):
-                    ax.annotate(
-                        f"Change: {change:.2%}",
-                        (timestamp, prob),
-                        textcoords="offset points",
-                        xytext=(0, 10),
-                        ha='center',
-                        color='red'
-                    )
-            
-            ax.set_xlabel("Date")
-            ax.set_ylabel("Risk Probability")
-            ax.set_title("Your Diabetes Risk Over Time")
-            ax.grid(True, linestyle='--', alpha=0.7)
-            
-            if st.session_state["settings"]["theme"] == "Dark":
-                ax.set_facecolor('#2c3e50')
-                fig.set_facecolor('#2c3e50')
-                ax.tick_params(colors='#ecf0f1')
-                ax.xaxis.label.set_color('#ecf0f1')
-                ax.yaxis.label.set_color('#ecf0f1')
-                ax.title.set_color('#ecf0f1')
-            else:
-                ax.set_facecolor('#ffffff')
-                fig.set_facecolor('#ffffff')
-                ax.tick_params(colors='#34495e')
-                ax.xaxis.label
+            # Calculate and
