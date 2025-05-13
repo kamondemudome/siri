@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+  <Tasks>
+    <Task>
+      <UID>1</UID>
+      <Name>Data Preprocessing</Name>
+      <Start>2025-04-25T08:00:00</Start>
+      <Finish>2025-04-27T17:00:00</Finish>
+      <Duration>PT3D</Duration>
+      <Notes>Clean dataset (data_preprocessing_new.py)</Notes>
+    </Task>
+    <Task>
+      <UID>2</UID>
+      <Name>Model Integration</Name>
+      <Start>2025-04-28T08:00:00</Start>
+      <Finish>2025-05-04T17:00:00</Finish>
+      <Duration>PT7D</Duration>
+      <Notes>Train model (model_training_new.py)</Notes>
+    </Task>
+    <Task>
+      <UID>3</UID>
+      <Name>UI Development</Name>
+      <Start>2025-05-05T08:00:00</Start>
+      <Finish>2025-05-18T17:00:00</Finish>
+      <Duration>PT14D</Duration>
+      <Notes>Build dashboard (index.py)</Notes>
+    </Task>
+    <Task>
+      <UID>4</UID>
+      <Name>Feature Implementation</Name>
+      <Start>2025-05-19T08:00:00</Start>
+      <Finish>2025-06-01T17:00:00</Finish>
+      <Duration>PT14D</Duration>
+      <Notes>Add prediction, reporting (index.py)</Notes>
+    </Task>
+    <Task>
+      <UID>5</UID>
+      <Name>Testing and Debugging</Name>
+      <Start>2025-06-02T08:00:00</Start>
+      <Finish>2025-06-08T17:00:00</Finish>
+      <Duration>PT7D</Duration>
+      <Notes>Unit and integration testing</Notes>
+    </Task>
+    <Task>
+      <UID>6</UID>
+      <Name>Documentation</Name>
+      <Start>2025-06-09T08:00:00</Start>
+      <Finish>2025-06-11T17:00:00</Finish>
+      <Duration>PT3D</Duration>
+      <Notes>Write documentation</Notes>
+    </Task>
+    <Task>
+      <UID>7</UID>
+      <Name>Deployment</Name>
+      <Start>2025-06-12T08:00:00</Start>
+      <Finish>2025-06-13T17:00:00</Finish>
+      <Duration>PT2D</Duration>
+      <Notes>Local server; optional cloud (main_new.py)</Notes>
+    </Task>
+  </Tasks>
+</Project>
