@@ -1,0 +1,232 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    
+    <!-- Title -->
+    <mxCell id="title" value="&lt;b&gt;Flowchart: AI-Based Diabetes Prediction and Diagnosis System Workflow&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontFamily=Calibri;" vertex="1" parent="1">
+      <mxGeometry x="500" y="40" width="400" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- ================= MAIN FLOW (LEFT COLUMN) ================= -->
+    <!-- Start -->
+    <mxCell id="start" value="&lt;b&gt;User Accesses Dashboard&lt;/b&gt;&lt;br&gt;(index.py)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#D3D3D3;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="100" width="200" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- Select Page -->
+    <mxCell id="selectPage" value="&lt;b&gt;Select Page&lt;/b&gt;&lt;br&gt;(Home, Detection, etc.)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="220" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow1" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="start" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Diabetes Detection Selected? -->
+    <mxCell id="detectionSelected" value="&lt;b&gt;Diabetes Detection&lt;br&gt;Tool Selected?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="320" width="120" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow2" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="selectPage" target="detectionSelected">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- YES Path -->
+    <mxCell id="fillForm" value="&lt;b&gt;Fill Form&lt;/b&gt;&lt;br&gt;(17 Features)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="460" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrowYes1" value="Yes" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="detectionSelected" target="fillForm">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Inputs Valid? -->
+    <mxCell id="inputsValid" value="&lt;b&gt;Inputs Valid?&lt;/b&gt;&lt;br&gt;(index.py)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="560" width="120" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow3" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="fillForm" target="inputsValid">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- YES Subpath -->
+    <mxCell id="formatInputs" value="&lt;b&gt;Format Inputs&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFDAB9;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="700" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrowYes2" value="Yes" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="inputsValid" target="formatInputs">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ML Processes -->
+    <mxCell id="loadModel" value="&lt;b&gt;Load Model&lt;/b&gt;&lt;br&gt;(new_diabetes_rf_model.pkl, model_training_new.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFDAB9;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="800" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow4" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="formatInputs" target="loadModel">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="predictProb" value="&lt;b&gt;Predict Probability&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFDAB9;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="900" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow5" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="loadModel" target="predictProb">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="computeSHAP" value="&lt;b&gt;Compute SHAP Values&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFDAB9;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1000" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow6" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="predictProb" target="computeSHAP">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="saveCSV" value="&lt;b&gt;Save to CSV&lt;/b&gt;&lt;br&gt;(prediction_history.csv)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFDAB9;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1100" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow7" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="computeSHAP" target="saveCSV">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="generatePDF" value="&lt;b&gt;Generate PDF Report&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFDAB9;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1200" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow8" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="saveCSV" target="generatePDF">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="displayResults" value="&lt;b&gt;Display Results&lt;/b&gt;&lt;br&gt;(Probability, SHAP Plot)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1300" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow9" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="generatePDF" target="displayResults">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- View Reports Decision -->
+    <mxCell id="viewReports" value="&lt;b&gt;View Reports &amp; Progress?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1400" width="120" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow10" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="displayResults" target="viewReports">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- YES to Reports -->
+    <mxCell id="filterHistory" value="&lt;b&gt;Filter History&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="250" y="1540" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrowYes3" value="Yes" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0;exitY=0.5;entryX=0.5;entryY=0;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="viewReports" target="filterHistory">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="displayTrend" value="&lt;b&gt;Display Trend Plot&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="250" y="1640" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow11" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="filterHistory" target="displayTrend">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Return to Select Page -->
+    <mxCell id="arrow12" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.25;entryY=0;entryPerimeter=1;" edge="1" parent="1" source="displayTrend" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- NO to Reports -->
+    <mxCell id="arrowNo1" value="No" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=1;exitY=0.5;entryX=0.75;entryY=0;entryPerimeter=1;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="viewReports" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- NO to Inputs Valid -->
+    <mxCell id="showError" value="&lt;b&gt;Show Error Message&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="700" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrowNo2" value="No" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="inputsValid" target="showError">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow13" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.75;entryY=0;entryPerimeter=1;" edge="1" parent="1" source="showError" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- NO to Detection Selected -->
+    <mxCell id="otherPage" value="&lt;b&gt;Other Page&lt;/b&gt;&lt;br&gt;(Home, Awareness, etc.)?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="460" width="120" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrowNo3" value="No" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=1;exitY=0.5;entryX=0.75;entryY=0;entryPerimeter=1;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="detectionSelected" target="otherPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- YES to Other Page -->
+    <mxCell id="displayContent" value="&lt;b&gt;Display Content&lt;/b&gt;&lt;br&gt;(Articles, Tips, etc.) (index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="600" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrowYes4" value="Yes" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="otherPage" target="displayContent">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow14" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.75;entryY=0;entryPerimeter=1;" edge="1" parent="1" source="displayContent" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- NO to Other Page -->
+    <mxCell id="arrowNo4" value="No" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.75;entryY=0;entryPerimeter=1;fontSize=10;fontFamily=Calibri;" edge="1" parent="1" source="otherPage" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Personalize Settings -->
+    <mxCell id="personalize" value="&lt;b&gt;Personalize Settings&lt;/b&gt;&lt;br&gt;(Theme, Font) (index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="800" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow15" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.75;entryY=0;entryPerimeter=1;" edge="1" parent="1" source="personalize" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Complete Daily Challenge -->
+    <mxCell id="dailyChallenge" value="&lt;b&gt;Complete Daily Challenge&lt;/b&gt;&lt;br&gt;(index.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ADD8E6;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="900" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow16" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="personalize" target="dailyChallenge">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow17" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.75;entryY=0;entryPerimeter=1;" edge="1" parent="1" source="dailyChallenge" target="selectPage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- End -->
+    <mxCell id="end" value="&lt;b&gt;User Exits or Continues&lt;/b&gt;&lt;br&gt;(index.py)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#D3D3D3;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1800" width="200" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow18" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="viewReports" target="end">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="1700" as="sourcePoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ================= BACKGROUND LANE (RIGHT COLUMN) ================= -->
+    <!-- Lane Separator -->
+    <mxCell id="laneSeparator" style="shape=line;html=1;strokeWidth=2;strokeColor=#000000;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="100" width="10" height="1800" as="geometry"/>
+    </mxCell>
+    <mxCell id="laneLabel" value="&lt;b&gt;Background Processes&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontFamily=Calibri;" vertex="1" parent="1">
+      <mxGeometry x="850" y="80" width="150" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Background Processes -->
+    <mxCell id="preprocess" value="&lt;b&gt;Preprocess Data&lt;/b&gt;&lt;br&gt;(data_preprocessing_new.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#90EE90;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="800" y="200" width="150" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="trainModel" value="&lt;b&gt;Train Model&lt;/b&gt;&lt;br&gt;(model_training_new.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#90EE90;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="800" y="300" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow19" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="preprocess" target="trainModel">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="evaluateModel" value="&lt;b&gt;Evaluate Model&lt;/b&gt;&lt;br&gt;(model_evaluation_new.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#90EE90;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="800" y="400" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow20" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="trainModel" target="evaluateModel">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="orchestrate" value="&lt;b&gt;Orchestrate Pipeline&lt;/b&gt;&lt;br&gt;(main_new.py)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#90EE90;strokeColor=#000000;fontFamily=Calibri;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="800" y="500" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="arrow21" style="edgeStyle=none;html=1;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="evaluateModel" target="orchestrate">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
