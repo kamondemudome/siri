@@ -5,6 +5,7 @@ import numpy as np
 import joblib
 import shap
 import io
+import streamlit as st
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
@@ -13,76 +14,8 @@ from reportlab.platypus import Image, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime, timedelta
 from sklearn.preprocessing import StandardScaler
-
-# Path to the shared settings file and model
-SETTINGS_FILE = "D:/Myproject/settings.json"
-MODEL_PATH = "D:/Myproject/new_diabetes_rf_model.pkl"
-
-# Define features and ranges
-FEATURES = [
-    'HighBP', 'HighChol', 'BMI', 'GenHlth', 'Smoker',
-    'PhysActivity', 'Fruits', 'Veggies', 'Age', 'Income'
-]
-
-FEATURE_RANGES = {
-    'HighBP': (0, 1), 'HighChol': (0, 1), 'BMI': (10, 100),
-    'GenHlth': (1, 5), 'Smoker': (0, 1), 'PhysActivity': (0, 1),
-    'Fruits': (0, 1), 'Veggies': (0, 1), 'Age': (1, 13), 'Income': (1, 8)
-}
-
-FEATURE_FULL_NAMES = {
-    'HighBP': 'High Blood Pressure',
-    'HighChol': 'High Cholesterol',
-    'BMI': 'Body Mass Index (BMI)',
-    'GenHlth': 'General Health Rating',
-    'Smoker': 'Smoking History (100+ Cigarettes)',
-    'PhysActivity': 'Physical Activity in Past 30 Days',
-    'Fruits': 'Daily Fruit Consumption',
-    'Veggies': 'Daily Vegetable Consumption',
-    'Age': 'Age Category',
-    'Income': 'Income Category'
-}
-
-FEATURE_DESCRIPTIONS = {
-    'HighBP': 'Do you have high blood pressure?',
-    'HighChol': 'Do you have high cholesterol?',
-    'BMI': 'What is your Body Mass Index (BMI)?',
-    'GenHlth': 'How would you rate your general health? (1 = Excellent, 5 = Poor)',
-    'Smoker': 'Have you smoked at least 100 cigarettes in your life?',
-    'PhysActivity': 'Have you done physical activity in the past 30 days?',
-    'Fruits': 'Do you consume fruit 1 or more times per day?',
-    'Veggies': 'Do you consume vegetables 1 or more times per day?',
-    'Age': 'What is your age category?',
-    'Income': 'What is your income category?'
-}
-
-FEATURE_TOOLTIPS = {
-    'HighBP': 'Select "Yes" if you have been diagnosed with high blood pressure.',
-    'HighChol': 'Select "Yes" if you have been diagnosed with high cholesterol.',
-    'BMI': 'Enter your BMI (e.g., 25.0). BMI = weight (kg) / height (m)^2.',
-    'GenHlth': 'Rate your overall health on a scale from 1 (excellent) to 5 (poor).',
-    'Smoker': 'Select "Yes" if you have smoked at least 100 cigarettes in your lifetime.',
-    'PhysActivity': 'Select "Yes" if you’ve done any physical activity (e.g., walking, exercise) in the past 30 days.',
-    'Fruits': 'Select "Yes" if you eat fruit at least once per day.',
-    'Veggies': 'Select "Yes" if you eat vegetables at least once per day.',
-    'Age': 'Select your age category (e.g., 1 = 18-24, 13 = 80+).',
-    'Income': 'Select your annual income category (e.g., 1 = < Ksh 10000, 8 = Ksh 1000000+).'
-}
-
-AGE_LABELS = {
-    1: "18-24", 2: "25-29", 3: "30-34", 4: "35-39", 5: "40-44", 6: "45-49",
-    7: "50-54", 8: "55-59", 9: "60-64", 10: "65-69", 11: "70-74", 12: "75-79", 13: "80+"
-}
-
-INCOME_LABELS = {
-    1: "< Ksh 10000", 2: "Ksh 10000-15000", 3: "Ksh 15000-25000", 4: "Ksh 25000-35000",
-    5: "Ksh 35000-50000", 6: "Ksh 50000-75000", 7: "Ksh 75000-100000", 8: "Ksh 1000000+"
-}
-
-EDUCATION_LABELS = {
-    1: "Never attended school", 2: "Grades 1-8", 3: "Grades 9-11", 4: "High school graduate",
-    5: "Some college", 6: "College graduate"
-}
+from database import save_prediction, get_user_predictions
+from constants import SETTINGS_FILE, MODEL_PATH, FEATURES, FEATURE_RANGES, FEATURE_FULL_NAMES, FEATURE_DESCRIPTIONS, FEATURE_TOOLTIPS, AGE_LABELS, INCOME_LABELS
 
 def ensure_directory_exists():
     directory = os.path.dirname(SETTINGS_FILE)
@@ -125,7 +58,7 @@ def apply_settings(settings):
     theme_css = """
     <style>
     body { font-family: 'Arial', sans-serif; }
-    .stApp { background-color: #f4f7fa; color: #34495e; padding-bottom: 60px; }
+    .stApp { background-color: #f4f7fa; color: #34495e; min-height: 100vh; }
     h1, h2, h3, h4, h5, h6 { color: #2c3e50; }
     .stMarkdown p { color: #34495e; }
     section[data-testid="stSidebar"] { background-color: #ecf0f1 !important; }
@@ -138,7 +71,7 @@ def apply_settings(settings):
     .stButton button:hover { background-color: #2980b9; }
     a { color: #3498db; text-decoration: none; }
     .stExpander { background-color: #ecf0f1; color: #34495e; border-radius: 5px; }
-    .footer { color: #7f8c8d; text-align: center; padding: 15px 0; border-top: 1px solid #d1d8e0; width: 100%; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); background-color: #ffffff; z-index: 1000; height: 60px; }
+    .footer { color: #7f8c8d; text-align: center; padding: 15px 0; border-top: 1px solid #d1d8e0; width: 100%; background-color: #ffffff; margin-top: auto; }
     .footer .message { font-weight: bold; font-size: 16px; }
     .footer .copyright, .footer .developer { font-size: 12px; }
     .disclaimer { color: #7f8c8d; }
@@ -147,7 +80,7 @@ def apply_settings(settings):
     """ if theme == "Light" else """
     <style>
     body { font-family: 'Arial', sans-serif; }
-    .stApp { background-color: #1e1e1e; color: #ecf0f1; padding-bottom: 60px; }
+    .stApp { background-color: #1e1e1e; color: #ecf0f1; min-height: 100vh; }
     h1, h2, h3, h4, h5, h6 { color: #ecf0f1; }
     .stMarkdown p { color: #ecf0f1; }
     section[data-testid="stSidebar"] { background-color: #2c3e50 !important; }
@@ -160,7 +93,7 @@ def apply_settings(settings):
     .stButton button:hover { background-color: #2980b9; }
     a { color: #66b3ff; text-decoration: none; }
     .stExpander { background-color: #34495e; color: #ecf0f1; border-radius: 5px; }
-    .footer { color: #bdc3c7; text-align: center; padding: 15px 0; border-top: 1px solid #34495e; width: 100%; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); background-color: #2c3e50; z-index: 1000; height: 60px; }
+    .footer { color: #bdc3c7; text-align: center; padding: 15px 0; border-top: 1px solid #34495e; width: 100%; background-color: #2c3e50; margin-top: auto; }
     .footer .message { font-weight: bold; font-size: 16px; }
     .footer .copyright, .footer .developer { font-size: 12px; }
     .disclaimer { color: #bdc3c7; }
@@ -207,9 +140,9 @@ def quick_predict_diabetes(bmi, phys_activity, fruits, age):
         base_risk = 0.3
         if bmi > 30:
             base_risk += 0.2
-        if phys_activity == 0:
+        if not phys_activity:
             base_risk += 0.15
-        if fruits == 0:
+        if not fruits:
             base_risk += 0.1
         if age > 9:
             base_risk += 0.15
@@ -346,30 +279,29 @@ def get_health_tips(user_data, shap_values):
         return ["Unable to generate specific health tips."]
 
 def save_to_csv(user_data, prob, prediction):
+    """Save prediction to SQLite database."""
     try:
-        record = user_data.copy()
-        record['Probability'] = prob
-        record['Prediction'] = categorize_risk(prob)
-        record['Timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        df = pd.DataFrame([record])
-        history_file = "D:/Myproject/prediction_history.csv"
-        os.makedirs(os.path.dirname(history_file), exist_ok=True)
-        if not os.path.exists(history_file):
-            df.to_csv(history_file, index=False)
-        else:
-            df.to_csv(history_file, mode='a', header=False, index=False)
+        user_id = st.session_state.get("user_id")
+        if not user_id:
+            st.error("You must be logged in to save predictions.")
+            print("Error: No user_id found in session state.")
+            return
+        save_prediction(user_id, user_data, prob, categorize_risk(prob))
     except Exception as e:
-        print(f"Error saving prediction history: {str(e)}")
+        st.error(f"Error saving prediction: {str(e)}")
+        print(f"Error saving prediction: {str(e)}")
 
 def load_prediction_history():
-    history_file = "D:/Myproject/prediction_history.csv"
+    """Load prediction history from SQLite database for the logged-in user."""
     try:
-        if os.path.exists(history_file):
-            df = pd.read_csv(history_file)
-            df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-            return df
-        return pd.DataFrame()
+        user_id = st.session_state.get("user_id")
+        if not user_id:
+            st.error("You must be logged in to view prediction history.")
+            print("Error: No user_id found in session state.")
+            return pd.DataFrame()
+        return get_user_predictions(user_id)
     except Exception as e:
+        st.error(f"Error loading prediction history: {str(e)}")
         print(f"Error loading prediction history: {str(e)}")
         return pd.DataFrame()
 
@@ -395,7 +327,8 @@ def generate_pdf_report(user_data, prob, prediction, shap_values):
         c.drawCentredString(width / 2, height - 50, "Diabetes Risk Prediction Report")
         c.setFont("Helvetica", 12)
         c.drawString(50, height - 80, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        y_position = height - 100
+        c.drawString(50, height - 100, f"User: {st.session_state.get('username', 'Anonymous')}")
+        y_position = height - 120
 
         c.setFont("Helvetica-Bold", 14)
         c.drawString(50, y_position, "Section 1: User Inputs")

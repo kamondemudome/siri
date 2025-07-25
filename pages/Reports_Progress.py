@@ -3,40 +3,98 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime, timedelta
-from utils import load_prediction_history, AGE_LABELS, EDUCATION_LABELS, INCOME_LABELS, FEATURE_FULL_NAMES
+from constants import AGE_LABELS, EDUCATION_LABELS, INCOME_LABELS, FEATURE_FULL_NAMES
+from utils import apply_settings, load_settings
+from database import init_db, get_user_predictions
 
-# Define the footer HTML
-footer_html = """
-<div class="footer">
-    <div class="message">Empower Your Health Journey – Stay Ahead of Diabetes!</div>
-    <div class="copyright">© 2025 Diabetes Risk Dashboard</div>
-    <div class="developer">Developed by Kamonde K. Mudome</div>
-</div>
-"""
+# Initialize database
+init_db()
 
-# Reports & Progress Page Content
-def main():
-    st.set_page_config(page_title="Reports & Progress", layout="wide")
-    st.markdown('<style>body { background-color: #f0f2f5; }</style>', unsafe_allow_html=True)
+# Login page for unauthenticated users
+def login_page():
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("Login Required")
+    st.write("Please log in through the home page to access the Reports & Progress page.")
+    st.markdown('<a href="index.py">Go to Login</a>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Centered Title with Slight Offset
-    st.markdown("""
-    <style>
-    .centered-title {
-        text-align: center;
-        margin-left: 10%;
-        font-size: 2em;
-        color: #2c3e50;
-    }
-    @media (prefers-color-scheme: dark) {
-        .centered-title { color: #ecf0f1; }
-    }
-    </style>
-    <div class="centered-title">📊 Diabetes Risk Dashboard</div>
-    """, unsafe_allow_html=True)
+# Main Reports & Progress content
+def main_app():
+    # Display username and logout button at top-right
+    if st.session_state.get("logged_in", False):
+        st.markdown(
+            f"""
+            <div class="user-logout-container">
+                <div class="username-container">
+                    <span class="username">{st.session_state.get("username", "User")}</span>
+                </div>
+                <div class="logout-button-container">
+                    <div id="logout-button-placeholder"></div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        with st.container():
+            # Place the Streamlit button in the placeholder div using CSS positioning
+            st.markdown(
+                """
+                <style>
+                .user-logout-container {
+                    position: fixed;
+                    top: 10px;
+                    right: 200px;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .username-container {
+                    display: flex;
+                    align-items: center;
+                }
+                .logout-button-container {
+                    display: inline-block;
+                    width: auto;
+                    height: auto;
+                    line-height: normal;
+                }
+                #logout-button-placeholder .stButton>button {
+                    background-color: #F7A072;
+                    color: white;
+                    border-radius: 10px;
+                    padding: 8px 16px;
+                    border: none;
+                    font-weight: 500;
+                    font-size: 1em;
+                    transition: background-color 0.2s, transform 0.2s;
+                    margin: 0;
+                    width: auto;
+                    height: auto;
+                }
+                #logout-button-placeholder .stButton>button:hover {
+                    background-color: #F5A46B;
+                    transform: scale(1.05);
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
+            if st.button("Logout", key="logout_button"):
+                st.session_state.clear()
+                st.session_state["page"] = "login"
+                st.query_params.clear()
+                st.rerun()
 
-    # Load prediction history
-    history_df = load_prediction_history()
+    st.title("📊 Diabetes Risk Dashboard")
+    st.markdown(f'<div class="animated-text">Track Your Progress, {st.session_state.get("username", "User")}!</div>', unsafe_allow_html=True)
+
+    # Load user-specific prediction history
+    user_id = st.session_state.get("user_id")
+    if not user_id:
+        st.error("User ID not found. Please log in again.")
+        return
+    history_df = get_user_predictions(user_id)
 
     # Talk to a Doctor Section
     st.markdown('<div class="doctor-card">', unsafe_allow_html=True)
@@ -60,7 +118,7 @@ def main():
         """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Progress Overview (Hero Section)
+    # Progress Overview
     st.markdown('<div class="health-card">', unsafe_allow_html=True)
     st.markdown("#### Your Progress Snapshot")
     if not history_df.empty:
@@ -99,7 +157,6 @@ def main():
     with col1:
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("#### Past Detection Results")
-        # Filters under the title
         min_date = history_df['Timestamp'].min().date() if not history_df.empty else datetime.now().date()
         max_date = history_df['Timestamp'].max().date() if not history_df.empty else datetime.now().date()
         col_f1, col_f2, col_f3 = st.columns([1, 1, 1])
@@ -112,13 +169,11 @@ def main():
             selected_risk = st.selectbox("Sort/Filter by Risk", risk_levels)
 
         if not history_df.empty:
-            # Filter by date range
             filtered_df = history_df[
                 (history_df['Timestamp'].dt.date >= start_date) &
                 (history_df['Timestamp'].dt.date <= end_date)
             ]
 
-            # Filter or sort by selected risk level
             if selected_risk == "Ascending":
                 filtered_df = filtered_df.sort_values(by="Probability", ascending=True)
             elif selected_risk == "Descending":
@@ -131,12 +186,10 @@ def main():
                 filtered_df = filtered_df[filtered_df['Probability'] > 0.5]
 
             if not filtered_df.empty:
-                # Prepare display DataFrame
                 display_df = filtered_df[['Timestamp', 'Prediction', 'Probability']].copy()
                 display_df['Probability'] = display_df['Probability'].apply(lambda x: f"{x:.2%}")
                 display_df['Details'] = ""
 
-                # Display the table
                 st.dataframe(
                     display_df,
                     column_config={
@@ -148,7 +201,6 @@ def main():
                     use_container_width=True
                 )
 
-                # Add expanders for each row
                 for idx, row in filtered_df.iterrows():
                     with st.expander(f"Details for {row['Timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
                         table_data = []
@@ -168,7 +220,6 @@ def main():
                         table_df = pd.DataFrame(table_data)
                         st.table(table_df)
 
-                # Download button
                 csv = filtered_df.to_csv(index=False)
                 st.download_button(
                     label="Download Prediction History as CSV",
@@ -185,10 +236,8 @@ def main():
     with col2:
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("#### Health Trends Over Time")
-        # Time Range Filter under the title
         time_range = st.selectbox("Select Time Range", ["Last 30 Days", "Last 90 Days", "All Time"])
         if not history_df.empty:
-            # Filter by time range
             filtered_trend_df = history_df.copy()
             if time_range == "Last 30 Days":
                 filtered_trend_df = filtered_trend_df[filtered_trend_df['Timestamp'] >= datetime.now() - timedelta(days=30)]
@@ -237,97 +286,108 @@ def main():
                 plt.close(fig)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add Footer with Modern Styling
+    # Footer
+    st.markdown("""
+    <div class="footer">
+        <div class="message">Empower Your Health Journey – Stay Ahead of Diabetes!</div>
+        <div class="copyright">© 2025 Diabetes Risk Dashboard</div>
+        <div class="developer">Developed by Kamonde K. Mudome</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Main function with authentication check
+def main():
+    st.set_page_config(page_title="Reports & Progress", layout="wide")
+    st.markdown(apply_settings(load_settings()), unsafe_allow_html=True)
+    # CSS styling (aligned with other files)
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
     body { font-family: 'Poppins', sans-serif; }
-    .stApp { 
-        background-color: #F9F5F0; 
-        color: #1A252F; 
-        min-height: 100vh; 
+    .stApp {
+        background-color: #F9F5F0;
+        color: #1A252F;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
+        padding-top: 60px; /* Add padding to avoid overlap with fixed header */
     }
-    @media (prefers-color-scheme: dark) { 
-        .stApp { 
-            background-color: #1A252F; 
-            color: #F9F5F0; 
-        } 
+    @media (prefers-color-scheme: dark) {
+        .stApp {
+            background-color: #1A252F;
+            color: #F9F5F0;
+        }
     }
-    .card, .health-card { 
-        background-color: #FFFFFF; 
-        border-radius: 15px; 
-        padding: 20px; 
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); 
-        margin-bottom: 20px; 
+    .card, .health-card {
+        background-color: #FFFFFF;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        color: #1A252F;
     }
-    @media (prefers-color-scheme: dark) { 
-        .card, .health-card { 
-            background-color: #2D3748; 
-            color: #F9F5F0; 
-        } 
+    @media (prefers-color-scheme: dark) {
+        .card, .health-card {
+            background-color: #2D3748;
+            color: #F9F5F0;
+        }
     }
-    .card:hover, .health-card:hover { transform: scale(1.02); transition: transform 0.2s ease-in-out; }
-    .doctor-card { 
-        background-color: #FFFFFF; 
-        border-radius: 15px; 
-        padding: 20px; 
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-        margin-bottom: 20px; 
-        text-align: center; 
+    .card:hover, .health-card:hover {
+        transform: scale(1.02);
+        transition: transform 0.2s ease-in-out;
     }
-    @media (prefers-color-scheme: dark) { 
-        .doctor-card { 
-            background-color: #2D3748; 
-            color: #F9F5F0; 
-        } 
+    .doctor-card {
+        background-color: #FFFFFF;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        text-align: center;
+        color: #1A252F;
     }
-    .doctor-card:hover { transform: scale(1.02); transition: transform 0.2s ease-in-out; }
+    @media (prefers-color-scheme: dark) {
+        .doctor-card {
+            background-color: #2D3748;
+            color: #F9F5F0;
+        }
+    }
+    .doctor-card:hover {
+        transform: scale(1.02);
+        transition: transform 0.2s ease-in-out;
+    }
     .whatsapp-button, .doctors-site {
-        background-color: #25D366; 
-        color: white; 
-        padding: 10px 20px; 
-        border-radius: 10px; 
-        display: inline-block; 
-        font-weight: 500; 
-        transition: transform 0.2s, background-color 0.2s; 
+        background-color: #25D366;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        display: inline-block;
+        font-weight: 500;
+        transition: transform 0.2s, background-color 0.2s;
     }
-    .doctors-site { background-color: #2c3e50; }
-    .whatsapp-button:hover, .doctors-site:hover {
-        transform: scale(1.05); 
-        background-color: #1DA851; 
+    .doctors-site {
+        background-color: #2c3e50;
     }
-    .doctors-site:hover { background-color: #23374d; }
-    .footer { 
-        text-align: center; 
-        padding: 10px 0; 
-        background-color: #F9F5F0; 
-        color: #1A252F; 
-        margin-top: auto; 
+    .whatsapp-button:hover {
+        background-color: #1DA851;
+        transform: scale(1.05);
     }
-    @media (prefers-color-scheme: dark) { 
-        .footer { 
-            background-color: #1A252F; 
-            color: #F9F5F0; 
-        } 
+    .doctors-site:hover {
+        background-color: #23374d;
+        transform: scale(1.05);
     }
-    .footer div { margin: 5px 0; }
-    .animated-text { 
-        margin-left: 2em; 
-        animation: fadeIn 2s ease-in-out; 
+    button {
+        background-color: #F7A072;
+        color: white;
+        border-radius: 10px;
+        padding: 10px 20px;
+        border: none;
+        font-weight: 500;
+        transition: transform 0.2s;
+        font-size: 1.1em;
     }
-    @keyframes fadeIn {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
-    }
-    .st-expander { 
-        color: #1A252F; 
-    }
-    @media (prefers-color-scheme: dark) { 
-        .st-expander { 
-            color: #F9F5F0; 
-        } 
+    button:hover {
+        background-color: #F5A46B;
+        transform: scale(1.05);
     }
     .metric-card {
         text-align: center;
@@ -336,22 +396,83 @@ def main():
         background: #f8f9fa;
     }
     @media (prefers-color-scheme: dark) {
-        .metric-card { background: #34495e; }
+        .metric-card {
+            background: #34495e;
+        }
     }
-    .value { font-size: 1.5em; font-weight: bold; color: #2c3e50; }
-    @media (prefers-color-scheme: dark) { .value { color: #ecf0f1; } }
-    .centered-title {
-        text-align: center;
-        margin-left: 10%;
-        font-size: 2em;
+    .value {
+        font-size: 1.5em;
+        font-weight: bold;
         color: #2c3e50;
     }
     @media (prefers-color-scheme: dark) {
-        .centered-title { color: #ecf0f1; }
+        .value {
+            color: #ecf0f1;
+        }
+    }
+    .animated-text {
+        margin-left: 2em;
+        animation: fadeIn 2s ease-in-out;
+    }
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    .st-expander {
+        color: #1A252F;
+    }
+    @media (prefers-color-scheme: dark) {
+        .st-expander {
+            color: #F9F5F0;
+        }
+    }
+    h1 {
+        color: #1A252F !important;
+    }
+    @media (prefers-color-scheme: dark) {
+        h1 {
+            color: #F9F5F0 !important;
+        }
+    }
+    .footer {
+        text-align: center;
+        padding: 10px 0;
+        background-color: #F9F5F0;
+        color: #1A252F;
+        margin-top: auto;
+    }
+    @media (prefers-color-scheme: dark) {
+        .footer {
+            background-color: #1A252F;
+            color: #F9F5F0;
+        }
+    }
+    .footer div {
+        margin: 5px 0;
+    }
+    .username {
+        font-weight: 500;
+        font-size: 1.1em;
+        color: #1A252F;
+    }
+    @media (prefers-color-scheme: dark) {
+        .username {
+            color: #F9F5F0;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
-    st.markdown(footer_html, unsafe_allow_html=True)
+
+    # Initialize session state
+    if "logged_in" not in st.session_state:
+        st.session_state["logged_in"] = False
+    if "settings" not in st.session_state:
+        st.session_state["settings"] = {"theme": "Light"}
+
+    if st.session_state["logged_in"]:
+        main_app()
+    else:
+        login_page()
 
 if __name__ == "__main__":
     main()
